@@ -1,0 +1,105 @@
+Going into production
+
+Am Laher
+Software Developer
+Hapara, Inc.
+am.laher@hapara.com
+
+* Outline
+
+The next step: moving from a Go prototype, towards a production-ready application.
+
+1. What is Go?
+2. Go at Hapara
+3. Code structure
+4. Examples
+5. Tools
+6. News
+
+* What is Go?
+
+- "Go is an answer to problems of scale at Google." Sameer Adjani.
+- Language designed by Rob Pike, Robert Griesemer, Ken Thompson; Ian Lance Taylor, Russ Cox.
+- Designed 2007. Open sourced 2009. Go1 was in 2012.
+- Statically typed, Garbage collected, compiled language. C family.
+- Designed for C++ developers. Embraced by Python, Ruby, PHP developers.
+- Small spec. Large standard library.
+- Concurrency primitives. Small footprint.
+
+* A quick example
+
+.play going-into-production/fibonacci.go
+
+* What do Google use it for?
+
+- "Lots of projects. Thousands of Go programmers. Millions of lines of Go code."
+- Public projects:
+ - SPDY proxy for Chrome on mobile devices
+ - Download server for Chrome, ChromeOS, Android SDK, Earth, etc.
+ - YouTube Vitess MySQL balancer
+
+* Who else is using it?
+
+- Apcera, Bitbucket, bitly, Canonical, CloudFlare, Core OS, Digital Ocean, Docker, Dropbox, Facebook, Getty Images, GitHub, Heroku, Iron.io, Kubernetes, Medium, MongoDB services, Mozilla services, New York Times, pool.ntp.org, Secret, SmugMug, SoundCloud, Stripe, Square, Thomson Reuters, Tumblr, VendHQ ...
+- Hapara
+
+* Go at Hapara
+
+- Hapara is an education technology company.
+- Strongly linked with Google Drive.
+- Majority of code written with Python on Google App Engine.
+- Go in research projects since 2013.
+- Public facing projects, mid 2015.
+- Web services with some data storage, and some 3rd party API integrations.
+
+* Introduction to a Hapara Go application
+
+- http.ListenAndServe(...)
+- Swagger-supported JSON APIs.
+- WebSockets via Pusher.
+- 
+
+* Code structure:
+
+<root>
+├── <projectname>
+│.. ├── dao 
+│.. ├── fixtures
+│.. ├── gdrive_integration
+│.. ├── middleware
+│.. ├── model
+│.. ├── services
+│.. ├── validation
+│.. └── webapi
+├── Godeps
+│   └── _workspace
+│       └── src
+│           ├── github.com
+│           │   ├── facebookgo
+│           │   │   └── grace
+│
+├── main.go
+├── routing.go
+├── wiring.go
+└── <project>.json
+
+* Call goroutine with recovery. Recovery middleware.
+
+* mgo (just like encoding/json)
+
+* Ticker (scheduled tasks)
+
+* Context (Gorilla)
+
+* Middleware example: Authentication/Authorization
+
+* Monitoring example
+
+* Shutdown handler
+
+* Subtyping: slices
+
+* Embedding: Creatable & Modifiable
+
+* Pointers & Values
+
