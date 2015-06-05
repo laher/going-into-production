@@ -28,7 +28,7 @@ The next step: moving from a Go prototype, towards a production-ready applicatio
 
 * A quick example
 
-.play going-into-production/fibonacci.go
+.play fibonacci/fibonacci.go
 
 * What do Google use it for?
 
@@ -61,7 +61,13 @@ The next step: moving from a Go prototype, towards a production-ready applicatio
 
 * Code structure:
 
+Here's a typical folder structure for one of our codebases.
+
 <root>
+├── cmd
+│.. ├── utility-x
+│.. ├── <projectname>-client
+│
 ├── <projectname>
 │.. ├── dao 
 │.. ├── fixtures
@@ -75,15 +81,25 @@ The next step: moving from a Go prototype, towards a production-ready applicatio
 │   └── _workspace
 │       └── src
 │           ├── github.com
-│           │   ├── facebookgo
-│           │   │   └── grace
+│           │   ├── Sirupsen
+│           │   │   └── logrus
 │
 ├── main.go
 ├── routing.go
 ├── wiring.go
 └── <project>.json
 
-* Call goroutine with recovery. Recovery middleware.
+* Invoke a goroutine without recovery.
+
+(run this outside browser)
+
+.play norecover/norecover.go
+
+* Invoke a goroutine with recovery. 
+
+(run this outside browser)
+
+.play recover/recover.go
 
 * mgo (just like encoding/json)
 
