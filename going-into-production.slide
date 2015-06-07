@@ -7,16 +7,18 @@ am.laher@hapara.com
 
 * Outline
 
-The next step: moving from a Go prototype, towards a production-ready application.
+Discussing some techniques for readying a Go project for production.
 
 1. What is Go?
 2. Go at Hapara
-3. Code structure
-4. Examples
-5. Tools
-6. News
+3. Prototype -> Production
+4. Code structure
+5. Examples
+6. Some tools
+.... Robert Intermission ...
+7. News (?)
 
-* What is Go?
+* 1. What is Go?
 
 - "Go is an answer to problems of scale at Google." Sameer Adjani.
 - Language designed by Rob Pike, Robert Griesemer, Ken Thompson; Ian Lance Taylor, Russ Cox.
@@ -24,7 +26,8 @@ The next step: moving from a Go prototype, towards a production-ready applicatio
 - Statically typed, Garbage collected, compiled language. C family.
 - Designed for C++ developers. Embraced by Python, Ruby, PHP developers.
 - Small spec. Large standard library.
-- Concurrency primitives. Small footprint.
+- Concurrency primitives. Goroutines multiplexed onto multiple OS threads.
+- Small footprint.
 
 * A quick example
 
@@ -43,7 +46,7 @@ The next step: moving from a Go prototype, towards a production-ready applicatio
 - Apcera, Bitbucket, bitly, Canonical, CloudFlare, Core OS, Digital Ocean, Docker, Dropbox, Facebook, Getty Images, GitHub, Heroku, Iron.io, Kubernetes, Medium, MongoDB services, Mozilla services, New York Times, pool.ntp.org, Secret, SmugMug, SoundCloud, Stripe, Square, Thomson Reuters, Tumblr, VendHQ ...
 - Hapara
 
-* Go at Hapara
+* 2. Go at Hapara
 
 - Hapara is an education technology company.
 - Strongly linked with Google Drive.
@@ -52,42 +55,101 @@ The next step: moving from a Go prototype, towards a production-ready applicatio
 - Public facing projects, mid 2015.
 - Web services with some data storage, and some 3rd party API integrations.
 
-* Introduction to a Hapara Go application
+* Overview of a typical Hapara Go application
 
+- HTTP/JSON APIs.
 - http.ListenAndServe(...)
-- Swagger-supported JSON APIs.
+- Deployed on Google Compute Engine. Load balancer. (TODO: Autoscaling)
+- Continuous delivery using Jenkins and Puppet.
+- (Mostly) stateless.
+- Persistence via mongodb. Cacheing via Redis.
 - WebSockets via Pusher.
-- 
 
-* Code structure:
 
-Here's a typical folder structure for one of our codebases.
+* 3. Prototype -> Production.
 
-<root>
+Many concerns around moving from a prototype towards a production-ready system.
+We're not covering all of them. 
+Just some Go-related tips and gotchas.
+
+Areas to think about:
+- Resilience, performance, load, security.
+- Visibility - logging, metrics.
+- Infrastructure, deployment.
+- Malleable code -> more rigidity.
+- Testing not covered today (see previous meetup!)
+
+* 4. Code structure:
+
+Gophertron (v0.2) now has a similar folder structure to some of our Go projects at Hapara.
+
+`go get github.com/laher/gophertron`
+
 ├── cmd
-│.. ├── utility-x
-│.. ├── <projectname>-client
-│
-├── <projectname>
-│.. ├── dao 
-│.. ├── fixtures
-│.. ├── gdrive_integration
-│.. ├── middleware
-│.. ├── model
-│.. ├── services
-│.. ├── validation
-│.. └── webapi
-├── Godeps
-│   └── _workspace
-│       └── src
-│           ├── github.com
-│           │   ├── Sirupsen
-│           │   │   └── logrus
-│
-├── main.go
-├── routing.go
-├── wiring.go
-└── <project>.json
+│   └── gopher-client
+├── gophers
+│   ├── db
+│   ├── middleware
+│   ├── model
+│   ├── services
+│   ├── webapi
+│   └── wiring
+
+* Key concerns:
+
+- Wiring & routing
+- Middleware
+- API handlers
+- Services
+- DB access
+- Auth/Auth
+- Logging
+- Monitoring
+- Error handling
+
+* 5. Code samples
+
+Much of the sample code is implemented in gophertron.
+
+`go get github.com/laher/gophertron`
+
+See 'v0.2' for the version in this talk.
+See tag 'v0.1' for the previous version (more prototype-like. Simpler layout).
+
+* 5.1 Scheduling work
+
+There's 2 different ways of scheduling work. Which do you prefer?
+
+option a. After & Tick:
+
+.play hello-boom/hello-boom.go
+
+* Scheduling work, opt b
+
+Option b. Tickers and timers
+
+.play ticker-timer/ticker-timer.go
+
+* 5.2 Middleware
+
+In the Go world, 'middleware' means the stuff which should be processed for every request (independent of which route it matches).
+
+- Middleware is commonly used for: logging requests, authentication, request logs, recovering from panics, response manipulation, ...
+- Middleware is easy enough to write using standard Go libraries.
+- For reusable middleware, we're using https://github.com/codegangsta/negroni.
+
+* Middleware example: Authentication/Authorization
+
+See gophertron/gophers/middleware/auth.go
+
+* 5.3 Panic/recover
+
+For most error handling, Go uses an interface called 'error'. This marries up with multiple-return-types.
+The exception to this is panic/recover.
+e.g.
+- Nil pointer errors
+- Array out of bounds
+- User-generated panics (don't overuse this!)
 
 * Invoke a goroutine without recovery.
 
@@ -95,27 +157,53 @@ Here's a typical folder structure for one of our codebases.
 
 .play norecover/norecover.go
 
-* Invoke a goroutine with recovery. 
+* Invoke a goroutine with recovery.
 
 (run this outside browser)
 
 .play recover/recover.go
 
-* mgo (just like encoding/json)
+* 5.4 Self-Monitoring
 
-* Ticker (scheduled tasks)
+Go comes with some runtime analysis built in. e.g. `runtime.MemStats{}`
 
-* Context (Gorilla)
+See gophertron/gophers/services/monitor.go
 
-* Middleware example: Authentication/Authorization
+Note: we also monitor some of our internal counters, such as cache sizes.
 
-* Monitoring example
+* 5.5 Shutdown handler
 
-* Shutdown handler
+Go has support for capturing process signals. These can be used to tidy up resources & finish up work before shutting down.
 
-* Subtyping: slices
+- Note that Go makes it easy to acheive graceful restarts with minimal downtime, in a controlled way.
+- See https://github.com/tylerb/graceful, negroni/graceful, https://github.com/facebookgo/grace
 
-* Embedding: Creatable & Modifiable
+But in our situation, I found it easier to implement my own shutdown handler.
+- CI deployment redeploys to each node sequentially.
+- The shutdown handler notifies the loadbalancer to stop forwarding requests (via healthcheck).
+- Then it waits for ongoing processes to finish their work.
+- Shuts down as soon as possible.
+- Restarts and accepts connections again.
+- Deployment continues to next VM.
 
-* Pointers & Values
+* A simple shutdown handler example.
 
+.play shutdown/shutdown.go
+
+* 5.6 Context 
+
+It is useful to have information passed through the lifetime of a request.
+
+- We're using Gorilla context. It was easy.
+- http://www.gorillatoolkit.org/pkg/context
+- Set stuff in a middleware handler.
+- Reuse it in the API Handlers.
+- Alternative: https://golang.org/x/net/context
+
+* 6. Some Go-specific tools
+
+- Godep (`godep save -r`)
+- Fresh ( https://github.com/pilu/fresh )
+- goimports ( golang.org/x/tools/cmd/goimports )
+- errcheck ( https://github.com/kisielk/errcheck )
+- vim-go / goclipse / GoSublime

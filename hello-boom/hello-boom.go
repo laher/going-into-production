@@ -6,18 +6,18 @@ import (
 )
 
 func main() {
-	tick := time.Tick(100 * time.Millisecond)
-	boom := time.After(500 * time.Millisecond)
+	tick := time.Tick(200 * time.Millisecond)
+	boom := time.After(1000 * time.Millisecond)
 	for {
 		select {
 		case <-tick:
-			fmt.Println("tick.")
+			fmt.Println("hello.")
 		case <-boom:
-			fmt.Println("BOOM!")
+			fmt.Println("boom .")
 			return
 		default:
-			fmt.Println("    .")
-			time.Sleep(50 * time.Millisecond)
+			fmt.Println("     .")
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 }
