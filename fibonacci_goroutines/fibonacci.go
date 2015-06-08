@@ -5,20 +5,20 @@ import (
 	"time"
 )
 
-func fibonacci(n int) []int {
+func fibonacci(n int, c chan int) {
 	x, y := 0, 1
-	res := []int{}
 	for i := 0; i < n; i++ {
 		time.Sleep(300 * time.Millisecond)
-		res = append(res, x)
+		c <- x
 		x, y = y, x+y
 	}
-	return res
+	close(c)
 }
 
 func main() {
-	c := fibonacci(10)
-	for _, i := range c {
+	c := make(chan int, 10)
+	go fibonacci(cap(c), c)
+	for i := range c {
 		fmt.Println(i)
 	}
 }

@@ -22,54 +22,58 @@ Discussing some techniques for readying a Go project for production.
 
 - "Go is an answer to problems of scale at Google." Sameer Adjani.
 - Language designed by Rob Pike, Robert Griesemer, Ken Thompson; Ian Lance Taylor, Russ Cox.
-- Designed 2007. Open sourced 2009. Go1 was in 2012.
+- Designed 2007. Open sourced 2009. Go1.0 released in 2012.
 - Statically typed, Garbage collected, compiled language. C family.
 - Designed for C++ developers. Embraced by Python, Ruby, PHP developers.
-- Small spec. Large standard library.
-- Concurrency primitives. Goroutines multiplexed onto multiple OS threads.
-- Small footprint.
+- Small spec, fast compiler; large standard library.
+- Concurrency primitives (Channels & Goroutines). Goroutines multiplexed onto multiple OS threads.
+- Small footprint. Statically linked binaries.
 
 * A quick example
 
 .play fibonacci/fibonacci.go
 
+* Using concurrency to improve the example
+
+.play fibonacci_goroutines/fibonacci.go
+
 * What do Google use it for?
 
-- "Lots of projects. Thousands of Go programmers. Millions of lines of Go code."
-- Public projects:
- - SPDY proxy for Chrome on mobile devices
- - Download server for Chrome, ChromeOS, Android SDK, Earth, etc.
- - YouTube Vitess MySQL balancer
+"Lots of projects. Thousands of Go programmers. Millions of lines of Go code." SA
+
+Public-facing projects:
+- SPDY proxy for Chrome on mobile devices
+- YouTube Vitess MySQL balancer
+- Download server for Chrome, ChromeOS, Android SDK, Earth, etc.
 
 * Who else is using it?
 
-- Apcera, Bitbucket, bitly, Canonical, CloudFlare, Core OS, Digital Ocean, Docker, Dropbox, Facebook, Getty Images, GitHub, Heroku, Iron.io, Kubernetes, Medium, MongoDB services, Mozilla services, New York Times, pool.ntp.org, Secret, SmugMug, SoundCloud, Stripe, Square, Thomson Reuters, Tumblr, VendHQ ...
-- Hapara
+- Globally: Apcera, Bitbucket, bitly, CloudFlare, Core OS, Digital Ocean, Docker, Dropbox, Facebook, Getty Images, GitHub, Heroku, Kubernetes, Medium, MongoDB services, Mozilla services, New York Times, pool.ntp.org, Secret, SmugMug, SoundCloud, Stripe, Square, Thomson Reuters, Tumblr ...
+- NZ: VendHQ, Iron.IO, Canonical
+- Hapara: Hapara
 
 * 2. Go at Hapara
 
 - Hapara is an education technology company.
-- Strongly linked with Google Drive.
-- Majority of code written with Python on Google App Engine.
-- Go in research projects since 2013.
+- Products integrate with Google Drive APIs, browser extensions.
+- Majority of back-end code written in Python on Google App Engine.
+- Using Go in research projects since 2013.
 - Public facing projects, mid 2015.
 - Web services with some data storage, and some 3rd party API integrations.
 
 * Overview of a typical Hapara Go application
 
-- HTTP/JSON APIs.
-- http.ListenAndServe(...)
+- HTTP/JSON APIs. http.ListenAndServe(...)
 - Deployed on Google Compute Engine. Load balancer. (TODO: Autoscaling)
 - Continuous delivery using Jenkins and Puppet.
-- (Mostly) stateless.
+- (Mostly) stateless applications.
 - Persistence via mongodb. Cacheing via Redis.
 - WebSockets via Pusher.
-
 
 * 3. Prototype -> Production.
 
 Many concerns around moving from a prototype towards a production-ready system.
-We're not covering all of them. 
+We're not covering all of them here.
 Just some Go-related tips and gotchas.
 
 Areas to think about:
@@ -95,21 +99,25 @@ Gophertron (v0.2) now has a similar folder structure to some of our Go projects 
 │   ├── webapi
 │   └── wiring
 
-* Key concerns:
+* Packages:
 
+We're generally treating the following concerns as packaging delineations.
+
+- Models
+- DB access
+- API handlers (thin HTTP/Json translation layer)
+- Frontend Services: for servicing APi handlers
+- Backend services: Auth, Monitoring, API clients
 - Wiring & routing
 - Middleware
-- API handlers
-- Services
-- DB access
-- Auth/Auth
-- Logging
-- Monitoring
-- Error handling
+- E2E test harness.
+- Test fixtures
+- Request context
+- Errors (?)
 
 * 5. Code samples
 
-Much of the sample code is implemented in gophertron.
+Much of the sample code is implemented in the gophertron project.
 
 `go get github.com/laher/gophertron`
 
@@ -207,3 +215,40 @@ It is useful to have information passed through the lifetime of a request.
 - goimports ( golang.org/x/tools/cmd/goimports )
 - errcheck ( https://github.com/kisielk/errcheck )
 - vim-go / goclipse / GoSublime
+
+* 7. News: Go 1.5
+
+- Due for release in August 2015.
+- Toolchain is entirely written in Go. [runtime ported previously]
+- To compile Go1.5 from source, you need a compiled Go1.4+
+- Reportedly slower compilation times.
+- Cross-compilation will be easier.
+- Better Android tooling/support; early IOS support. Better Java bindings. PPC64, ARM64?
+- New GC introduces max latency guarantees. 40ms in every 50ms 
+- ( http://llvm.cc/t/go-1-4-garbage-collection-plan-and-roadmap-golang-org/33 )
+- Stacks reimplemented again. Completely in Go ... time for a better debugger?
+- default for Gomaxprocs = numcpu (formerly 1)
+- Private 'internal' packages. Useful!
+- ( golang.org/s/go14internal )
+
+* News: Google-produced tools:
+
+Available in the tools repo:
+- callgraph: display the call graph of a Go program.
+- gomvpkg: moves go packages, updating import declarations.
+- gorename: type-safe renaming of identifiers in Go sourced code.
+
+Coming soon:
+- sockdrawer: a tool for automatically splitting packages.
+
+* News: gb
+
+- New build tool by Dave Cheney.
+- Alternative to 'go build'. Vendoring, but different.
+- http://getgb.io/
+
+* News: Gophercon
+
+- Gophercon is in Denver, CO, in July.
+- We're going.
+- Yep, I'm just showing off.
