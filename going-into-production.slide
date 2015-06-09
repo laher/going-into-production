@@ -57,7 +57,7 @@ Public-facing projects:
 - Hapara is an education technology company.
 - Products integrate with Google Drive APIs, browser extensions.
 - Majority of back-end code written in Python on Google App Engine.
-- Using Go in research projects since 2013.
+- Using Go in research projects since ~2013.
 - Public facing projects, mid 2015.
 - Web services with some data storage, and some 3rd party API integrations.
 
@@ -106,7 +106,7 @@ We're generally treating the following concerns as packaging delineations.
 - Models
 - DB access
 - API handlers (thin HTTP/Json translation layer)
-- Frontend Services: for servicing APi handlers
+- Frontend Services: for servicing API handlers
 - Backend services: Auth, Monitoring, API clients
 - Wiring & routing
 - Middleware
